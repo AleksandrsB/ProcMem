@@ -1,6 +1,13 @@
-# ProcMem Project
+# ProcMem
 
-A simple library for reading and writing memory in a process.
+ProcMem is a C++ library for reading and writing memory in a process. This library supports both 32-bit and 64-bit architectures.
+
+## Features
+- Use the process name to connect and obtain a handle.
+- Read values of various types from the process memory.
+- Write values of various types to the process memory.
+- Retrieve the base address of a module in the process.
+- Support for both single values and arrays.
 
 ## Files
 
