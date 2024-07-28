@@ -40,6 +40,9 @@ int main()
     }
 
     std::cout << "USER32.dll found at: " << std::hex << user32Addr << std::endl;
+	
+	// The first 4 bytes of USER32.dll are: 0x4D 0x5A 0x90 0x00 (or 0x00905A4D in 4-byte hex)
+	// Let's check it.
     int value = pm.readMemory<int>(user32Addr);
     bool assertEqual = value == 0x00905A4D;
 
