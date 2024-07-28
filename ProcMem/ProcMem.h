@@ -9,7 +9,7 @@
  * @class ProcMem
  * @brief A class for reading and writing memory in a process.
  *
- * @author Aleksandrs Buraks
+ * @author AleksandrsB
  */
 class ProcMem
 {
