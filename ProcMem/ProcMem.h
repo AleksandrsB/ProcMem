@@ -15,56 +15,41 @@ class ProcMem
 {
 private:
 	HANDLE			ProcessHandle = nullptr;	/// Handle to the process.
-
-public:
 	DWORD			ProcessID = 0;				/// ID of the process.
 	std::wstring	ProcessName = L"";			/// Name of the process to be accessed.
+
+public:
+
 	bool			isConnected = false;		/// Indicates whether the process is successfully connected.
 
+public:
 	/**
 	 * @brief Constructor that initializes ProcMem with the process name and opens a handle to the process.
 	 * @param procName The name of the process to connect to.
 	 * @throws std::runtime_error If the toolhelp snapshot or process handle could not be created.
 	 */
-	ProcMem(const std::wstring& procName)
-	{
-		this->ProcessName = procName;
-
-		ProcessID = 0;
-		HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (snapshot != INVALID_HANDLE_VALUE) {
-			PROCESSENTRY32 pe;
-			pe.dwSize = sizeof(pe);
-			if (Process32First(snapshot, &pe)) {
-				do {
-					if (ProcessName == pe.szExeFile) {
-						ProcessID = pe.th32ProcessID;
-						break;
-					}
-				} while (Process32Next(snapshot, &pe));
-			}
-			CloseHandle(snapshot);
-		}
-		else throw std::runtime_error("Failed to create toolhelp snapshot");
-
-		if (ProcessID != 0) {
-			ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcessID);
-			if (ProcessHandle != nullptr) {
-				isConnected = true;
-			}
-		}
-	}
+	ProcMem(const std::wstring& procName);
 
 	/**
 	 * @brief Destructor that closes the process handle if it is open.
 	 */
-	~ProcMem()
-	{
-		if (ProcessHandle) {
-			CloseHandle(ProcessHandle);
-			ProcessHandle = nullptr;
-		}
-	}
+	~ProcMem();
+
+	/**
+	 * @brief Retrieves the base address of a module in the process.
+	 * @param moduleName The name of the module whose base address is to be retrieved.
+	 * @return The base address of the module, or 0 if the module was not found.
+	 * @throws std::runtime_error If creating the toolhelp snapshot fails.
+	 */
+	std::uintptr_t GetModuleBaseAddress(const std::wstring& moduleName);
+
+	/**
+	 * @brief Retrieves the ProcessID (PID)
+	 * @return The base address of the module, or 0 if the module was not found.
+	 */
+	DWORD getProcessID() { return this->ProcessID; }
+	HANDLE getProcessHandle() { return this->ProcessHandle; }
+	const std::wstring getProcessName() { return this->ProcessName; }
 
 	/**
 	 * @brief Reads a value of type T from the specified address in the process memory.
@@ -136,34 +121,5 @@ public:
 		if (!success || (bytesWritten != sizeof(T) * count))
 			throw std::runtime_error("Failed to write memory array");
 		return true;
-	}
-
-	/**
-	 * @brief Retrieves the base address of a module in the process.
-	 * @param moduleName The name of the module whose base address is to be retrieved.
-	 * @return The base address of the module, or 0 if the module was not found.
-	 * @throws std::runtime_error If creating the toolhelp snapshot fails.
-	 */
-	std::uintptr_t GetModuleBaseAddress(const std::wstring& moduleName)
-	{
-		if (ProcessID == 0) return 0;
-
-		std::uintptr_t baseAddress = 0;
-		HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, ProcessID);
-		if (hSnapshot != INVALID_HANDLE_VALUE) {
-			MODULEENTRY32 me;
-			me.dwSize = sizeof(me);
-			if (Module32First(hSnapshot, &me)) {
-				do {
-					if (moduleName == me.szModule) {
-						baseAddress = reinterpret_cast<std::uintptr_t>(me.modBaseAddr);
-						break;
-					}
-				} while (Module32Next(hSnapshot, &me));
-			}
-			CloseHandle(hSnapshot);
-		}
-		else throw std::runtime_error("Failed to create toolhelp snapshot");
-		return baseAddress;
 	}
 };
