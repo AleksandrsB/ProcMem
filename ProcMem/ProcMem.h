@@ -38,7 +38,7 @@ public:
 	 * @return The base address of the module, or 0 if the module was not found.
 	 * @throws std::runtime_error If creating the toolhelp snapshot fails.
 	 */
-	std::uintptr_t GetModuleBaseAddress(const std::wstring& moduleName);
+	std::uintptr_t getModuleBaseAddress(const std::wstring& moduleName);
 
 	/**
 	 * @brief Retrieves the ProcessName.
@@ -63,7 +63,7 @@ public:
 	 * @brief Checks if the process is connected.
 	 * @return True if connected, otherwise false.
 	 */
-	bool getIsConnected() const { return this->m_isConnected; }
+	bool getConnectedState() const { return this->m_isConnected; }
 
 	/**
 	 * @brief Reads a value of type T from the specified address in the process memory.

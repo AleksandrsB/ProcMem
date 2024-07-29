@@ -8,7 +8,7 @@ int main()
 
 	ProcMem pm(procName);
 
-	if (!pm.isConnected)
+	if (!pm.getConnectedState())
 	{
 		std::cout << "Failed to connect to process!" << std::endl;
 		return 0;
@@ -16,7 +16,7 @@ int main()
 
 	std::cout << "Successfully connected to the process!\nProcessID: " << std::hex << pm.getProcessID() << std::endl;
 
-	std::uintptr_t user32Addr = pm.GetModuleBaseAddress(L"USER32.dll");
+	std::uintptr_t user32Addr = pm.getModuleBaseAddress(L"USER32.dll");
 	if (user32Addr == 0)
 	{
 		std::cout << "USER32.dll module not found in " << procName.c_str();

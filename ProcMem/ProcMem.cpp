@@ -37,7 +37,7 @@ ProcMem::~ProcMem()
 	}
 }
 
-std::uintptr_t ProcMem::GetModuleBaseAddress(const std::wstring& moduleName)
+std::uintptr_t ProcMem::getModuleBaseAddress(const std::wstring& moduleName)
 {
 	if (ProcessID == 0) return 0;
 
