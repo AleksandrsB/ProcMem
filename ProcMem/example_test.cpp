@@ -14,7 +14,7 @@ int main()
 		return 0;
 	}
 
-	std::cout << "Successfully connected to the process!\nProcessID: " << std::hex << pm.ProcessID << std::endl;
+	std::cout << "Successfully connected to the process!\nProcessID: " << std::hex << pm.getProcessID() << std::endl;
 
 	std::uintptr_t user32Addr = pm.GetModuleBaseAddress(L"USER32.dll");
 	if (user32Addr == 0)
