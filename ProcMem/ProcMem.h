@@ -14,13 +14,10 @@
 class ProcMem
 {
 private:
-	HANDLE			ProcessHandle = nullptr;	/// Handle to the process.
-	DWORD			ProcessID = 0;				/// ID of the process.
-	std::wstring	ProcessName = L"";			/// Name of the process to be accessed.
-
-public:
-
-	bool			isConnected = false;		/// Indicates whether the process is successfully connected.
+	std::wstring	m_ProcessName = L"";			/// Name of the process to be accessed.
+	DWORD			m_ProcessID = 0;				/// ID of the process.
+	HANDLE			m_ProcessHandle = nullptr;	/// Handle to the process.
+	bool			m_isConnected = false;		/// Indicates whether the process is successfully connected.
 
 public:
 	/**
@@ -44,12 +41,29 @@ public:
 	std::uintptr_t GetModuleBaseAddress(const std::wstring& moduleName);
 
 	/**
-	 * @brief Retrieves the ProcessID (PID)
-	 * @return The base address of the module, or 0 if the module was not found.
+	 * @brief Retrieves the ProcessName.
+	 * @return The name of the connected process.
 	 */
-	DWORD getProcessID() { return this->ProcessID; }
-	HANDLE getProcessHandle() { return this->ProcessHandle; }
-	const std::wstring getProcessName() { return this->ProcessName; }
+	const std::wstring& getProcessName() const { return this->m_ProcessName; }
+
+	/**
+	 * @brief Retrieves the ProcessID (PID).
+	 * @return The ProcessID of the connected process.
+	 */
+	DWORD getProcessID() const { return this->m_ProcessID; }
+
+	/**
+	 * @brief Retrieves the ProcessHandle.
+	 * @return The ProcessHandle of the connected process.
+	 */
+	HANDLE getProcessHandle() const { return this->m_ProcessHandle; }
+
+	
+	/**
+	 * @brief Checks if the process is connected.
+	 * @return True if connected, otherwise false.
+	 */
+	bool getIsConnected() const { return this->m_isConnected; }
 
 	/**
 	 * @brief Reads a value of type T from the specified address in the process memory.
