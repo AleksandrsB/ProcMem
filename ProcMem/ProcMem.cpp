@@ -2,17 +2,17 @@
 
 ProcMem::ProcMem(const std::wstring& procName)
 {
-	this->ProcessName = procName;
+	this->m_ProcessName = procName;
 
-	ProcessID = 0;
+	this->m_ProcessID = 0;
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (snapshot != INVALID_HANDLE_VALUE) {
 		PROCESSENTRY32 pe;
 		pe.dwSize = sizeof(pe);
 		if (Process32First(snapshot, &pe)) {
 			do {
-				if (ProcessName == pe.szExeFile) {
-					ProcessID = pe.th32ProcessID;
+				if (this->m_ProcessName == pe.szExeFile) {
+					this->m_ProcessID = pe.th32ProcessID;
 					break;
 				}
 			} while (Process32Next(snapshot, &pe));
@@ -21,28 +21,28 @@ ProcMem::ProcMem(const std::wstring& procName)
 	}
 	else throw std::runtime_error("Failed to create toolhelp snapshot");
 
-	if (ProcessID != 0) {
-		ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcessID);
-		if (ProcessHandle != nullptr) {
-			isConnected = true;
+	if (this->m_ProcessID != 0) {
+		this->m_ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, this->m_ProcessID);
+		if (this->m_ProcessHandle != nullptr) {
+			this->m_isConnected = true;
 		}
 	}
 }
 
 ProcMem::~ProcMem()
 {
-	if (ProcessHandle) {
-		CloseHandle(ProcessHandle);
-		ProcessHandle = nullptr;
+	if (this->m_ProcessHandle) {
+		CloseHandle(this->m_ProcessHandle);
+		this->m_ProcessHandle = nullptr;
 	}
 }
 
 std::uintptr_t ProcMem::getModuleBaseAddress(const std::wstring& moduleName)
 {
-	if (ProcessID == 0) return 0;
+	if (this->m_ProcessID == 0) return 0;
 
 	std::uintptr_t baseAddress = 0;
-	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, ProcessID);
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, this->m_ProcessID);
 	if (hSnapshot != INVALID_HANDLE_VALUE) {
 		MODULEENTRY32 me;
 		me.dwSize = sizeof(me);

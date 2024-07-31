@@ -76,7 +76,7 @@ public:
 	inline T readMemory(std::uintptr_t fromAddr)
 	{
 		T value;
-		if (ReadProcessMemory(ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), &value, sizeof(T), nullptr))
+		if (ReadProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), &value, sizeof(T), nullptr))
 			return value;
 		throw std::runtime_error("Failed to read memory");
 	}
@@ -93,7 +93,7 @@ public:
 	inline std::vector<T> readMemoryArray(std::uintptr_t fromAddr, size_t count)
 	{
 		std::vector<T> buffer(count);
-		if (ReadProcessMemory(ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), buffer.data(), sizeof(T) * count, nullptr))
+		if (ReadProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), buffer.data(), sizeof(T) * count, nullptr))
 			return buffer;
 		throw std::runtime_error("Failed to read memory array");
 	}
@@ -110,7 +110,7 @@ public:
 	inline bool writeMemory(std::uintptr_t toAddr, T value)
 	{
 		SIZE_T bytesWritten;
-		bool success = WriteProcessMemory(ProcessHandle, reinterpret_cast<LPVOID>(toAddr), reinterpret_cast<LPCVOID>(&value), sizeof(T), &bytesWritten);
+		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), reinterpret_cast<LPCVOID>(&value), sizeof(T), &bytesWritten);
 
 		if (!success || (bytesWritten != sizeof(T)))
 			throw std::runtime_error("Failed to write memory");
@@ -130,7 +130,7 @@ public:
 	inline bool writeMemoryArray(std::uintptr_t toAddr, const T* values, size_t count)
 	{
 		SIZE_T bytesWritten;
-		bool success = WriteProcessMemory(ProcessHandle, reinterpret_cast<LPVOID>(toAddr), values, sizeof(T) * count, &bytesWritten);
+		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), values, sizeof(T) * count, &bytesWritten);
 
 		if (!success || (bytesWritten != sizeof(T) * count))
 			throw std::runtime_error("Failed to write memory array");
