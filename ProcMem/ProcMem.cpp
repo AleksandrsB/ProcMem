@@ -3,8 +3,8 @@
 ProcMem::ProcMem(const std::wstring& procName)
 {
 	this->m_ProcessName = procName;
-
 	this->m_ProcessID = 0;
+
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if (snapshot == INVALID_HANDLE_VALUE) {
 		throw std::runtime_error("Failed to create toolhelp snapshot");
