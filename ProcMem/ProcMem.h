@@ -4,6 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <Psapi.h>
 
 /**
  * @class ProcMem
