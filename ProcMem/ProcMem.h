@@ -4,7 +4,6 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include <Psapi.h>
 
 struct ModuleOffset
 {

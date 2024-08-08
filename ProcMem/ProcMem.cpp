@@ -3,23 +3,34 @@
 ProcMem::ProcMem(const std::wstring& procName)
 {
 	this->m_ProcessName = procName;
-
 	this->m_ProcessID = 0;
+
 	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (snapshot != INVALID_HANDLE_VALUE) {
-		PROCESSENTRY32 pe;
-		pe.dwSize = sizeof(pe);
-		if (Process32First(snapshot, &pe)) {
-			do {
-				if (this->m_ProcessName == pe.szExeFile) {
-					this->m_ProcessID = pe.th32ProcessID;
-					break;
-				}
-			} while (Process32Next(snapshot, &pe));
-		}
-		CloseHandle(snapshot);
+	if (snapshot == INVALID_HANDLE_VALUE) {
+		throw std::runtime_error("Failed to create toolhelp snapshot");
 	}
-	else throw std::runtime_error("Failed to create toolhelp snapshot");
+
+	PROCESSENTRY32 pe;
+	pe.dwSize = sizeof(pe);
+	if (Process32First(snapshot, &pe)) {
+		do {
+			if (this->m_ProcessName == pe.szExeFile) {
+				HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pe.th32ProcessID);
+				if (hProcess) {
+					PROCESS_MEMORY_COUNTERS pmc;
+					if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
+						if (pmc.WorkingSetSize > 0) {  // Check if process is active
+							this->m_ProcessID = pe.th32ProcessID;
+							CloseHandle(hProcess);
+							break;
+						}
+					}
+					CloseHandle(hProcess);
+				}
+			}
+		} while (Process32Next(snapshot, &pe));
+	}
+	CloseHandle(snapshot);
 
 	if (this->m_ProcessID != 0) {
 		this->m_ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, this->m_ProcessID);
