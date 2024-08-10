@@ -52,6 +52,13 @@ std::uintptr_t ProcMem::getModuleBaseAddress(const std::wstring& moduleName)
 {
 	if (this->m_ProcessID == 0) return 0;
 
+	// Check if the module base address is already cached
+	auto it = m_ModuleCache.find(moduleName);
+	if (it != m_ModuleCache.end())
+	{
+		return it->second;
+	}
+
 	std::uintptr_t baseAddress = 0;
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, this->m_ProcessID);
 	if (hSnapshot != INVALID_HANDLE_VALUE) {
@@ -61,10 +68,13 @@ std::uintptr_t ProcMem::getModuleBaseAddress(const std::wstring& moduleName)
 			do {
 				if (moduleName == me.szModule) {
 					baseAddress = reinterpret_cast<std::uintptr_t>(me.modBaseAddr);
+					// Cache and return the base address
+					m_ModuleCache[moduleName] = baseAddress;
 					break;
 				}
 			} while (Module32Next(hSnapshot, &me));
 		}
+		m_ModuleCache[moduleName] = 0;
 		CloseHandle(hSnapshot);
 	}
 	else throw std::runtime_error("Failed to create toolhelp snapshot");

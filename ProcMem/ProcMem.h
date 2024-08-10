@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <Psapi.h>
+#include <unordered_map>
 
 /**
  * @class ProcMem
@@ -19,6 +20,7 @@ private:
 	DWORD			m_ProcessID = 0;				/// ID of the process.
 	HANDLE			m_ProcessHandle = nullptr;	/// Handle to the process.
 	bool			m_isConnected = false;		/// Indicates whether the process is successfully connected.
+	std::unordered_map<std::wstring, std::uintptr_t> m_ModuleCache; /// Cache for module base addresses.
 
 public:
 	/**
