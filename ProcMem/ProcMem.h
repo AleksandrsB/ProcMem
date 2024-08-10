@@ -7,6 +7,12 @@
 #include <Psapi.h>
 #include <unordered_map>
 
+struct ModuleOffset
+{
+	std::wstring moduleName;
+	std::uintptr_t moduleOffset;
+};
+
 /**
  * @class ProcMem
  * @brief A class for reading and writing memory in a process.
@@ -61,7 +67,7 @@ public:
 	 */
 	HANDLE getProcessHandle() const { return this->m_ProcessHandle; }
 
-	
+
 	/**
 	 * @brief Checks if the process is connected.
 	 * @return True if connected, otherwise false.
@@ -84,6 +90,15 @@ public:
 		throw std::runtime_error("Failed to read memory");
 	}
 
+	template<typename T>
+	inline T readMemory(const ModuleOffset& fromModuleAddr)
+	{
+		std::uintptr_t fromAddr = getModuleBaseAddress(fromModuleAddr.moduleName) + fromModuleAddr.moduleOffset;
+		T value;
+		if (ReadProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), &value, sizeof(T), nullptr))
+			return value;
+		throw std::runtime_error("Failed to read memory");
+	}
 	/**
 	 * @brief Reads an array of values of type T from the specified address in the process memory.
 	 * @tparam T The type of the values to be read.
@@ -101,6 +116,15 @@ public:
 		throw std::runtime_error("Failed to read memory array");
 	}
 
+	template<typename T>
+	inline std::vector<T> readMemoryArray(const ModuleOffset& fromModuleAddr, size_t count)
+	{
+		std::uintptr_t fromAddr = getModuleBaseAddress(fromModuleAddr.moduleName) + fromModuleAddr.moduleOffset;
+		std::vector<T> buffer(count);
+		if (ReadProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPCVOID>(fromAddr), buffer.data(), sizeof(T) * count, nullptr))
+			return buffer;
+		throw std::runtime_error("Failed to read memory array");
+	}
 	/**
 	 * @brief Writes a value of type T to the specified address in the process memory.
 	 * @tparam T The type of the value to be written.
@@ -112,6 +136,17 @@ public:
 	template<typename T>
 	inline bool writeMemory(std::uintptr_t toAddr, T value)
 	{
+		SIZE_T bytesWritten;
+		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), reinterpret_cast<LPCVOID>(&value), sizeof(T), &bytesWritten);
+
+		if (!success || (bytesWritten != sizeof(T)))
+			throw std::runtime_error("Failed to write memory");
+		return true;
+	}
+	template<typename T>
+	inline bool writeMemory(const ModuleOffset& toModuleAddr, T value)
+	{
+		std::uintptr_t toAddr = getModuleBaseAddress(toModuleAddr.moduleName) + toModuleAddr.moduleOffset;
 		SIZE_T bytesWritten;
 		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), reinterpret_cast<LPCVOID>(&value), sizeof(T), &bytesWritten);
 
@@ -132,6 +167,17 @@ public:
 	template<typename T>
 	inline bool writeMemoryArray(std::uintptr_t toAddr, const T* values, size_t count)
 	{
+		SIZE_T bytesWritten;
+		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), values, sizeof(T) * count, &bytesWritten);
+
+		if (!success || (bytesWritten != sizeof(T) * count))
+			throw std::runtime_error("Failed to write memory array");
+		return true;
+	}
+	template<typename T>
+	inline bool writeMemoryArray(const ModuleOffset& toModuleAddr, const T* values, size_t count)
+	{
+		std::uintptr_t toAddr = getModuleBaseAddress(toModuleAddr.moduleName) + toModuleAddr.moduleOffset;
 		SIZE_T bytesWritten;
 		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), values, sizeof(T) * count, &bytesWritten);
 
