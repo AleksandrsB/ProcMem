@@ -15,16 +15,11 @@ int main()
 
 	std::cout << "Successfully connected to the process!\nProcessID: " << std::hex << pm.getProcessID() << std::endl;
 
-	std::uintptr_t user32Addr = pm.getModuleBaseAddress(L"USER32.dll");
-	if (user32Addr == 0)
-	{
-		std::cout << "USER32.dll module not found in " << procName.c_str();
-		return 0;
-	}
-
-	std::cout << "USER32.dll found at: " << std::hex << user32Addr << std::endl;
-	int value = pm.readMemory<int>(user32Addr);
+	int value = pm.readMemory<int>({L"USER32.dll", 0x0});
 	bool assertEqual = value == 0x00905A4D;
+
+	value = pm.readMemory<int>({ L"USER32.dll", 0x0 });
+	assertEqual = value == 0x00905A4D;
 
 	std::cout << "Value: " << value << ", assertEqual: " << (assertEqual ? "true" : "false") << std::endl;
 }

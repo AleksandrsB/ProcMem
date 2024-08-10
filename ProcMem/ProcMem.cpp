@@ -68,15 +68,22 @@ std::uintptr_t ProcMem::getModuleBaseAddress(const std::wstring& moduleName)
 			do {
 				if (moduleName == me.szModule) {
 					baseAddress = reinterpret_cast<std::uintptr_t>(me.modBaseAddr);
-					// Cache and return the base address
-					m_ModuleCache[moduleName] = baseAddress;
 					break;
 				}
 			} while (Module32Next(hSnapshot, &me));
 		}
-		m_ModuleCache[moduleName] = 0;
+
+		// If baseAddress is still 0, the module was not found
+		if (baseAddress == 0) {
+			m_ModuleCache[moduleName] = 0;  // Cache 0 for the failed case
+		}
+
 		CloseHandle(hSnapshot);
 	}
-	else throw std::runtime_error("Failed to create toolhelp snapshot");
+	else {
+		throw std::runtime_error("Failed to create toolhelp snapshot");
+	}
+	// Cache and return the base address
+	m_ModuleCache[moduleName] = baseAddress;
 	return baseAddress;
 }
