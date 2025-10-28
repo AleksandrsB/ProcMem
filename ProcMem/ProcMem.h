@@ -137,6 +137,7 @@ public:
 	inline bool writeMemory(std::uintptr_t toAddr, T value)
 	{
 		SIZE_T bytesWritten;
+		// 123
 		bool success = WriteProcessMemory(this->m_ProcessHandle, reinterpret_cast<LPVOID>(toAddr), reinterpret_cast<LPCVOID>(&value), sizeof(T), &bytesWritten);
 
 		if (!success || (bytesWritten != sizeof(T)))
